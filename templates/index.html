@@ -1,1 +1,96 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>云平台巡检</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .card {
+            border: 1px solid #ccc;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 5px;
+            width: 600px;
+            min-height: 100px;
+            white-space: pre-wrap;
+            font-family: monospace;
+            background-color: #fff;
+        }
+        .btn {
+             width: 20%;                
+             margin: 5px 0;
+    padding: 6px 0;
+    cursor: pointer;
+    border: none;
+    border-radius: 4px;
+    background-color: #007bff;
+    color: #fff;
+    box-sizing: border-box;
+        }
+        
 
+        .btn:hover {
+            background-color: #0056b3;
+        }
+        #buttons-container {
+           display: flex;
+           flex-wrap: wrap;    
+           width: 600px;        
+        }
+
+    </style>
+          
+</head>
+<body>
+
+<h2>云平台巡检信息</h2>
+
+<div id="buttons-container"></div>
+<div id="output-card" class="card">这里显示命令结果</div>
+
+<script>
+    // 前端命令列表，对应后端 commands 字典
+    const commands = [
+        {name: 'cpu', display: 'CPU使用情况'},
+        {name: 'mem', display: '内存使用情况'},
+        {name: 'disk', display: '根分区使用情况'},
+        {name: 'osd', display: 'osd分区使用情况'},
+        {name: 'systemload', display: '系统负载'},
+        {name: 'dok', display: 'docker服务'},
+        {name: 'cep', display: 'ceph服务'},
+	{name: 'nova', display: 'nova服务'}, 
+	{name: 'cinder', display: 'cinder服务'} 
+    ];
+
+    const container = document.getElementById('buttons-container');
+    const card = document.getElementById('output-card');
+
+    commands.forEach(cmd => {
+        const btn = document.createElement('button');
+        btn.className = 'btn';
+        btn.innerText = cmd.display;
+        btn.onclick = () => runCommand(cmd);
+        container.appendChild(btn);
+
+    });
+
+    function runCommand(cmd) {
+        card.innerText = "请等待...";
+
+        fetch(`/run_${cmd.name}`, {method: 'POST'})
+            .then(res => res.json())
+            .then(data => {
+                card.innerText = `${cmd.display}：\n${data.result}`;
+            })
+            .catch(err => {
+                card.innerText = `执行失败：${err}`;
+            });
+    }
+</script>
+
+</body>
+</html>
